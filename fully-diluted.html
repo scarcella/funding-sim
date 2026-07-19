@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Fully Diluted</title>
+<style>
+  :root {
+    --bg: #FCFCFA;
+    --card: #FFFFFF;
+    --field: #FFFFFF;
+    --ink: #242B26;
+    --muted: #6E776F;
+    --faint: #A4ABA3;
+    --line: #EAECE6;
+    --line-soft: #F3F4F0;
+    --accent: #0FA96B;
+    --accent-ink: #FFFFFF;
+    --danger: #C05A50;
+    --shadow: 0 1px 3px rgba(30, 38, 31, 0.04);
+    --serif: ui-serif, "New York", Georgia, "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131614;
+      --card: #1A1E1B;
+      --field: #151816;
+      --ink: #E7EAE5;
+      --muted: #969E97;
+      --faint: #6C746D;
+      --line: #2A2F2B;
+      --line-soft: #232824;
+      --accent: #4CD09E;
+      --accent-ink: #10241C;
+      --danger: #D28078;
+      --shadow: none;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg: #FCFCFA; --card: #FFFFFF; --field: #FFFFFF; --ink: #242B26;
+    --muted: #6E776F; --faint: #A4ABA3; --line: #EAECE6; --line-soft: #F3F4F0;
+    --accent: #0FA96B; --accent-ink: #FFFFFF; --danger: #C05A50;
+    --shadow: 0 1px 3px rgba(30, 38, 31, 0.04);
+  }
+  :root[data-theme="dark"] {
+    --bg: #131614; --card: #1A1E1B; --field: #151816; --ink: #E7EAE5;
+    --muted: #969E97; --faint: #6C746D; --line: #2A2F2B; --line-soft: #232824;
+    --accent: #4CD09E; --accent-ink: #10241C; --danger: #D28078;
+    --shadow: none;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .shell { max-width: 1240px; margin: 0 auto; padding: 0 24px 64px; }
+
+  header.top {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 26px 2px 20px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 24px;
+    letter-spacing: 0.01em;
+  }
+  .top-actions { display: flex; gap: 8px; }
+
+  main { display: grid; grid-template-columns: 350px minmax(0, 1fr); gap: 20px; align-items: start; }
+
+  /* ---------- generic ---------- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+  .card + .card { margin-top: 20px; }
+
+  h2.sect {
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sect-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 14px 16px 10px;
+  }
+  .sect-note { font-size: 11.5px; color: var(--faint); }
+
+  label.f {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 8px;
+    outline: none;
+  }
+  input:focus-visible { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+  input::placeholder { color: var(--faint); }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    padding: 6px 12px;
+  }
+  button:hover { border-color: var(--muted); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button.quiet {
+    border: none; background: none; color: var(--muted);
+    padding: 4px 6px; font-size: 12.5px;
+  }
+  button.quiet:hover { color: var(--ink); }
+  button.del {
+    border: none; background: none; color: var(--faint);
+    font-size: 15px; line-height: 1; padding: 4px 6px;
+  }
+  button.del:hover { color: var(--danger); }
+
+  /* ---------- controls ---------- */
+  .founder-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 74px 26px;
+    gap: 8px;
+    align-items: center;
+    padding: 6px 16px;
+  }
+  .pct-wrap { position: relative; }
+  .pct-wrap::after {
+    content: "%";
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    color: var(--faint); font-size: 12px; pointer-events: none;
+  }
+  input.pct { padding-right: 24px; text-align: right; }
+
+  .money {
+    display: flex; align-items: center;
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .money:focus-within { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .money .cur { color: var(--faint); font-size: 12px; padding-left: 8px; }
+  .money input {
+    flex: 1; min-width: 0;
+    border: none; background: transparent;
+    padding: 6px 2px 6px 3px;
+  }
+  .money input:focus-visible { border: none; box-shadow: none; }
+  .unit-wrap { position: relative; flex: none; }
+  .unit-wrap::after {
+    content: "\25BE";
+    position: absolute; right: 5px; top: 50%; transform: translateY(-50%);
+    color: var(--faint); font-size: 9px; pointer-events: none;
+  }
+  .unit-wrap select {
+    -webkit-appearance: none; appearance: none;
+    border: none; background: transparent;
+    color: var(--muted); font: inherit; font-size: 12px; font-weight: 600;
+    padding: 6px 15px 6px 4px; cursor: pointer;
+  }
+  .unit-wrap select:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; border-radius: 4px; }
+  .founder-dot { position: absolute; left: -9px; top: 50%; transform: translateY(-50%); }
+  .name-wrap { position: relative; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+
+  .pool-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 74px 26px;
+    gap: 8px; align-items: center;
+    padding: 8px 16px 4px;
+    border-top: 1px solid var(--line-soft);
+    margin-top: 6px;
+  }
+  .pool-row .lbl { color: var(--muted); font-size: 13px; }
+
+  .ctl-foot { padding: 10px 16px 14px; display: flex; gap: 8px; align-items: center; }
+  .norm-note { font-size: 11.5px; color: var(--danger); padding: 0 16px 10px; }
+
+  .rounds-list { display: flex; flex-direction: column; }
+  .round-card {
+    border-top: 1px solid var(--line-soft);
+    padding: 12px 16px 14px;
+  }
+  .round-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .chip {
+    font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 4px; font-weight: 600;
+  }
+  .chip.safe  { color: #A26A12; background: color-mix(in srgb, #F2A93B 20%, transparent); }
+  .chip.priced { color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+  .chip.pool { color: var(--muted); background: color-mix(in srgb, #B4BCB5 28%, transparent); }
+  .round-head .rname { font-weight: 600; font-size: 13.5px; flex: 1; min-width: 0; }
+  .round-head input.rname-edit {
+    flex: 1; min-width: 0;
+    font-weight: 600; font-size: 13.5px;
+    background: transparent; border-color: transparent;
+    padding: 3px 6px;
+  }
+  .round-head input.rname-edit:hover { border-color: var(--line); }
+  .round-head input.rname-edit:focus-visible { background: var(--field); border-color: var(--accent); }
+  .round-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .round-grid .wide { grid-column: 1 / -1; }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button {
+    flex: 1; border: none; border-radius: 0; background: var(--field);
+    color: var(--muted); padding: 5px 4px; font-size: 12px;
+  }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button.on { background: color-mix(in srgb, var(--accent) 12%, var(--field)); color: var(--accent); font-weight: 600; }
+
+  .add-row { display: flex; gap: 8px; padding: 12px 16px 14px; border-top: 1px solid var(--line-soft); }
+  .add-row button { flex: 1; color: var(--muted); font-size: 13px; }
+  .add-row button:hover { color: var(--ink); }
+  .add-row button b { color: var(--ink); font-weight: 600; }
+
+  .empty-hint { padding: 8px 16px 14px; color: var(--faint); font-size: 12.5px; }
+
+  /* ---------- results ---------- */
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .sum-card { padding: 12px 14px; }
+  .sum-card .who { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; min-width: 0; }
+  .sum-card .who span.nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sum-card .big {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+  }
+  .sum-card .val { color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+
+  .tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    border: none; background: none; border-radius: 0;
+    padding: 8px 14px;
+    color: var(--muted); font-size: 13.5px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--ink); border-color: transparent transparent var(--line); }
+  .tab-btn.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+
+  .exit-card {
+    display: flex; flex-wrap: wrap; align-items: flex-start;
+    gap: 20px 32px;
+    padding: 16px;
+  }
+  .exit-left { flex: 0 0 210px; min-width: 180px; }
+  .exit-left .money { margin-top: 10px; }
+  .exit-sub { font-size: 11px; color: var(--faint); margin-top: 6px; }
+  .exit-payouts {
+    flex: 1; min-width: 230px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px 16px;
+  }
+  .payout .who { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 12px; min-width: 0; }
+  .payout .who .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .payout .big {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-variant-numeric: tabular-nums;
+    margin-top: 2px;
+    color: var(--accent);
+  }
+  .payout .val { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .exit-others {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line-soft);
+    padding-top: 8px;
+    color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums;
+  }
+  .exit-hint { color: var(--faint); font-size: 13px; align-self: center; }
+  .split-wrap { padding: 16px 16px 6px; }
+  .split-bar {
+    display: flex; height: 12px;
+    border-radius: 6px; overflow: hidden;
+    background: var(--line-soft);
+  }
+  .split-bar i { display: block; height: 100%; }
+
+  .chart-card { padding: 16px 16px 8px; position: relative; }
+  #chartWrap { position: relative; }
+  #chart { display: block; width: 100%; }
+  #chart text { font-family: var(--sans); }
+  #chart text.endlbl { filter: brightness(0.7) saturate(1.25); }
+  @media (prefers-color-scheme: dark) {
+    #chart text.endlbl { filter: none; }
+  }
+  :root[data-theme="dark"] #chart text.endlbl { filter: none; }
+  :root[data-theme="light"] #chart text.endlbl { filter: brightness(0.7) saturate(1.25); }
+  .chart-note { font-size: 11.5px; color: var(--faint); padding: 6px 2px 8px; }
+
+  #tip {
+    position: absolute; pointer-events: none; z-index: 5;
+    background: var(--card); border: 1px solid var(--line); border-radius: 7px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.13);
+    padding: 8px 10px; font-size: 12px; min-width: 150px;
+    display: none;
+  }
+  #tip .t-head { font-weight: 600; margin-bottom: 5px; font-size: 12px; }
+  #tip .t-head small { color: var(--faint); font-weight: 400; }
+  #tip .t-row { display: flex; align-items: center; gap: 6px; padding: 1px 0; }
+  #tip .t-row .nm { flex: 1; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+  #tip .t-row .pv { font-variant-numeric: tabular-nums; }
+
+  .table-card { margin-top: 20px; }
+  .stage-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 16px 4px; }
+  .stage-chips button {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    color: var(--muted); background: none;
+  }
+  .stage-chips button.on {
+    background: var(--ink); color: var(--bg); border-color: var(--ink);
+  }
+  .tbl-meta { padding: 6px 16px 2px; color: var(--muted); font-size: 12.5px; }
+  .tbl-meta b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  .cap-wrap { overflow-x: auto; padding: 4px 6px 8px; }
+  table.cap { width: 100%; border-collapse: collapse; min-width: 480px; }
+  table.cap th {
+    text-align: left; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; padding: 8px 10px 6px; border-bottom: 1px solid var(--line);
+  }
+  table.cap th.num, table.cap td.num { text-align: right; }
+  table.cap td { padding: 7px 10px; border-bottom: 1px solid var(--line-soft); font-variant-numeric: tabular-nums; }
+  table.cap tr:last-child td { border-bottom: none; }
+  table.cap td .h-name { display: flex; align-items: center; gap: 8px; }
+  table.cap td .h-sub { color: var(--faint); font-size: 11.5px; margin-left: 16px; }
+  table.cap td.grp {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--faint); padding-top: 12px; padding-bottom: 3px; border-bottom: none;
+  }
+  .bar-cell { display: inline-flex; align-items: center; gap: 8px; justify-content: flex-end; width: 100%; }
+  .mini-bar { width: 64px; height: 5px; border-radius: 3px; background: var(--line-soft); overflow: hidden; flex: none; }
+  .mini-bar i { display: block; height: 100%; border-radius: 3px; }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    .shell { padding: 0 14px 48px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    button, input { transition: border-color 120ms ease, color 120ms ease, background 120ms ease; }
+  }
+</style>
+
+<div class="shell">
+  <header class="top">
+    <div class="wordmark">Fully Diluted</div>
+    <div class="top-actions">
+      <button class="quiet" id="resetBtn" title="Restore the example scenario">Reset</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="controls">
+      <div class="card" id="foundersCard">
+        <div class="sect-head">
+          <h2 class="sect">Founders</h2>
+          <span class="sect-note">at incorporation</span>
+        </div>
+        <div id="foundersList"></div>
+        <div class="norm-note" id="normNote" hidden></div>
+        <div class="ctl-foot">
+          <button class="quiet" id="addFounder">+ Add founder</button>
+        </div>
+      </div>
+
+      <div class="card" id="roundsCard">
+        <div class="sect-head">
+          <h2 class="sect">Rounds</h2>
+          <span class="sect-note">in order</span>
+        </div>
+        <div class="rounds-list" id="roundsList"></div>
+        <div class="add-row">
+          <button id="addSafe">+ <b>SAFE</b></button>
+          <button id="addPriced">+ <b>Priced</b></button>
+          <button id="addPool">+ <b>Options</b></button>
+        </div>
+      </div>
+    </aside>
+
+    <section id="results">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn on" id="tabBtnDilution" type="button">Dilution</button>
+        <button class="tab-btn" id="tabBtnExit" type="button">Exit</button>
+      </div>
+
+      <div id="tabDilution">
+        <div class="summary">
+          <div id="summaryFounders" style="display: contents;"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div id="chartWrap">
+            <svg id="chart" role="img" aria-label="Ownership across funding rounds"></svg>
+            <div id="tip"></div>
+          </div>
+          <div class="chart-note" id="chartNote" hidden>SAFE columns are estimates — shown as if converted at their cap. They true up at the next priced round.</div>
+        </div>
+
+        <div class="card table-card">
+          <div class="stage-chips" id="stageChips"></div>
+          <div class="tbl-meta" id="tblMeta"></div>
+          <div class="cap-wrap">
+            <table class="cap" id="capTable"></table>
+          </div>
+        </div>
+      </div>
+
+      <div id="tabExit" hidden>
+        <div class="card exit-card">
+          <div class="exit-left">
+            <h2 class="sect">If you sell the business for</h2>
+            <div id="exitMoney"></div>
+            <div class="exit-sub">gross proceeds, before preferences &amp; taxes</div>
+          </div>
+          <div class="exit-payouts" id="exitPayouts"></div>
+        </div>
+
+        <div class="card table-card">
+          <div class="split-wrap"><div class="split-bar" id="exitBar"></div></div>
+          <div class="cap-wrap">
+            <table class="cap" id="exitTable"></table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/*__SIM_START__*/
+"use strict";
+
+const TOTAL0 = 10000000;
+
+const FOUNDER_COLORS = ["#F2A93B", "#F0795A", "#E8709C", "#E5C04B", "#DE8A4A", "#E2635C"];
+const INVESTOR_COLORS = ["#35B39A", "#5B9BD9", "#8B87E0", "#46BBD1", "#63BE7B", "#9D8BDB", "#2FA0B8", "#6FA8E0"];
+const POOL_COLOR = "#B4BCB5";
+
+function parseMoney(str) {
+  if (typeof str === "number") return str;
+  if (!str) return 0;
+  const m = String(str).replace(/[$,\s]/g, "").match(/^(\d*\.?\d+)([kKmMbB])?/);
+  if (!m) return 0;
+  const mult = { k: 1e3, m: 1e6, b: 1e9 }[(m[2] || "").toLowerCase()] || 1;
+  return parseFloat(m[1]) * mult;
+}
+
+function fmtMoney(n) {
+  if (!isFinite(n) || n <= 0) return "—";
+  if (n >= 1e9) return "$" + trim1(n / 1e9) + "B";
+  if (n >= 1e6) return "$" + trim1(n / 1e6) + "M";
+  if (n >= 1e3) return "$" + trim1(n / 1e3) + "K";
+  return "$" + Math.round(n);
+}
+function trim1(x) {
+  const v = x >= 100 ? Math.round(x) : Math.round(x * 10) / 10;
+  return String(v);
+}
+function fmtPct(f) {
+  const p = f * 100;
+  if (p > 0 && p < 0.1) return "<0.1%";
+  return (p >= 10 ? p.toFixed(1) : p.toFixed(1)) + "%";
+}
+
+function defaultRoundName(i) {
+  if (i === 1) return "Seed";
+  return "Series " + String.fromCharCode(63 + i); // 2 -> A, 3 -> B ...
+}
+
+function sumShares(m) {
+  let t = 0;
+  for (const k in m) t += m[k];
+  return t;
+}
+
+// Core simulation. Returns { stakeholders: [{id,name,kind,sub,color}], stages: [{label, est, post, shares, total}] }
+function simulate(state) {
+  const stakeholders = [];
+  const shares = {};
+
+  const weights = state.founders.map((f) => Math.max(0, Number(f.pct) || 0));
+  const sumW = weights.reduce((a, b) => a + b, 0);
+  const poolPct = Math.min(90, Math.max(0, Number(state.initialPool) || 0));
+  const founderShares = TOTAL0 * (1 - poolPct / 100);
+
+  state.founders.forEach((f, i) => {
+    const id = "f" + f.id;
+    stakeholders.push({ id, name: f.name || "Founder " + (i + 1), kind: "founder", sub: null });
+    shares[id] = sumW > 0 ? (founderShares * weights[i]) / sumW : 0;
+  });
+
+  let hasPool = false;
+  function ensurePool() {
+    if (!hasPool) {
+      hasPool = true;
+      stakeholders.push({ id: "pool", name: "Option pool", kind: "pool", sub: null });
+      if (!(("pool") in shares)) shares.pool = 0;
+    }
+  }
+  if (poolPct > 0) {
+    ensurePool();
+    shares.pool = TOTAL0 * (poolPct / 100);
+  }
+
+  const stages = [];
+  const pending = [];
+  let safeCount = 0;
+  let pricedCount = 0;
+
+  stages.push({ label: "Start", est: false, post: null, shares: { ...shares } });
+
+  // Convert a batch of pending SAFEs into a shares map (mutates map). refPrice = priced-round
+  // reference price for discounts (0 if unknown, i.e. estimating before any priced round).
+  function convertSafes(map, refPrice) {
+    const S0 = sumShares(map);
+    if (S0 <= 0) return;
+    // Pre-money-cap SAFEs first: price = cap / pre-conversion shares, or discount price if better.
+    for (const p of pending) {
+      if (p.capType !== "pre") continue;
+      const capPrice = p.cap > 0 ? p.cap / S0 : Infinity;
+      const discPrice = p.discount > 0 && refPrice > 0 ? refPrice * (1 - p.discount / 100) : Infinity;
+      const price = Math.min(capPrice, discPrice);
+      if (isFinite(price) && price > 0) map[p.stId] = (map[p.stId] || 0) + p.amount / price;
+    }
+    // Post-money-cap SAFEs as a batch: each targets amount/cap of the post-conversion company.
+    const posts = pending.filter((p) => p.capType !== "pre");
+    if (posts.length) {
+      const base = sumShares(map);
+      let fracs = posts.map((p) => {
+        let t = p.cap > 0 ? p.amount / p.cap : 0;
+        if (p.discount > 0 && refPrice > 0) {
+          // discount alternative, expressed as an ownership fraction of the pre-money company
+          const pre = refPrice * base;
+          const tDisc = pre > 0 ? p.amount / (pre * (1 - p.discount / 100) + p.amount) : 0;
+          t = Math.max(t, tDisc);
+        }
+        return Math.min(0.95, Math.max(0, t));
+      });
+      let T = fracs.reduce((a, b) => a + b, 0);
+      if (T >= 0.95) {
+        const k = 0.95 / T;
+        fracs = fracs.map((t) => t * k);
+        T = 0.95;
+      }
+      posts.forEach((p, i) => {
+        if (fracs[i] > 0) map[p.stId] = (map[p.stId] || 0) + (fracs[i] * base) / (1 - T);
+      });
+    }
+  }
+
+  for (const r of state.rounds) {
+    if (r.type === "safe") {
+      safeCount++;
+      const stId = "r" + r.id;
+      const capTxt = r.cap > 0 ? fmtMoney(r.cap) + " " + (r.capType === "pre" ? "pre" : "post") + " cap" : "uncapped";
+      const discTxt = r.discount > 0 ? ", " + r.discount + "% disc." : "";
+      stakeholders.push({
+        id: stId,
+        name: r.label || "SAFE " + safeCount,
+        kind: "investor",
+        sub: fmtMoney(r.amount) + " · " + capTxt + discTxt,
+      });
+      pending.push({ ...r, stId });
+
+      // Estimated stage: as if every pending SAFE converted at its cap today.
+      const hyp = { ...shares };
+      convertSafes(hyp, 0);
+      const impliedPost =
+        r.capType === "pre"
+          ? (r.cap || 0) + pending.reduce((a, p) => a + (p.amount || 0), 0)
+          : r.cap || 0;
+      stages.push({ label: r.label || "SAFE " + safeCount, est: true, post: impliedPost > 0 ? impliedPost : null, shares: hyp });
+    } else if (r.type === "pool") {
+      // Option grant: expand the pool so it equals the target % of the company today.
+      const target = Math.min(60, Math.max(0, Number(r.pct) || 0)) / 100;
+      if (target > 0) {
+        ensurePool();
+        const S = sumShares(shares);
+        const pool0 = shares.pool || 0;
+        if (S > 0) {
+          const x = (target * S - pool0) / (1 - target);
+          if (x > 0) shares.pool = pool0 + x;
+        }
+      }
+      const prev = stages[stages.length - 1];
+      let snap = { ...shares };
+      let est = false;
+      if (pending.length) { convertSafes(snap, 0); est = true; }
+      stages.push({ label: "Options " + Math.round(target * 100) + "%", est, post: prev ? prev.post : null, shares: snap });
+    } else {
+      pricedCount++;
+      const name = r.name || defaultRoundName(pricedCount);
+      const pre = Math.max(0, Number(r.premoney) || 0);
+      const I = Math.max(0, Number(r.amount) || 0);
+
+      // 1. SAFEs convert at the better of cap price and discounted round price.
+      const S0 = sumShares(shares);
+      const refPrice = pre > 0 && S0 > 0 ? pre / S0 : 0;
+      convertSafes(shares, refPrice);
+      pending.length = 0;
+
+      // 2. New money at price = pre-money / fully diluted shares.
+      const stId = "r" + r.id;
+      stakeholders.push({
+        id: stId,
+        name: name + " investors",
+        kind: "investor",
+        sub: fmtMoney(I) + " at " + fmtMoney(pre) + " pre-money",
+      });
+      if (pre > 0 && I > 0) {
+        const Sp = sumShares(shares);
+        shares[stId] = I / (pre / Sp);
+      }
+      stages.push({ label: name, est: false, post: pre > 0 && I > 0 ? pre + I : null, shares: { ...shares } });
+    }
+  }
+
+  for (const st of stages) st.total = sumShares(st.shares);
+
+  // Colors: founders warm, investors cool, pool grey.
+  let fi = 0, vi = 0;
+  for (const h of stakeholders) {
+    if (h.kind === "founder") h.color = FOUNDER_COLORS[fi++ % FOUNDER_COLORS.length];
+    else if (h.kind === "pool") h.color = POOL_COLOR;
+    else h.color = INVESTOR_COLORS[vi++ % INVESTOR_COLORS.length];
+  }
+
+  // Stack order: founders bottom, pool, then investors chronologically on top.
+  const order = [
+    ...stakeholders.filter((h) => h.kind === "founder"),
+    ...stakeholders.filter((h) => h.kind === "pool"),
+    ...stakeholders.filter((h) => h.kind === "investor"),
+  ];
+
+  return { stakeholders: order, stages };
+}
+/*__SIM_END__*/
+
+/* ============================== app state ============================== */
+
+const STORAGE_KEY = "fully-diluted-v1";
+
+function defaultState() {
+  return {
+    seq: 10,
+    founders: [
+      { id: 1, name: "Founder 1", pct: 50 },
+      { id: 2, name: "Founder 2", pct: 50 },
+    ],
+    initialPool: 0,
+    rounds: [
+      { id: 3, type: "safe", amount: 500000, cap: 6000000, capType: "post", discount: 0 },
+      { id: 4, type: "priced", name: "", amount: 2500000, premoney: 12000000 },
+      { id: 5, type: "pool", pct: 10 },
+      { id: 6, type: "priced", name: "", amount: 8000000, premoney: 32000000 },
+    ],
+    exit: 100000000,
+    selectedStage: -1,
+  };
+}
+
+let state = loadState();
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && Array.isArray(s.founders) && Array.isArray(s.rounds)) {
+        // migrate: priced-round "pool after %" fields become standalone option-grant events
+        if (s.rounds.some((r) => r.type === "priced" && r.pool > 0)) {
+          const out = [];
+          for (const r of s.rounds) {
+            out.push(r);
+            if (r.type === "priced" && r.pool > 0) {
+              out.push({ id: ++s.seq, type: "pool", pct: r.pool });
+              delete r.pool;
+            }
+          }
+          s.rounds = out;
+        }
+        return s;
+      }
+    }
+  } catch (e) { /* fall through */ }
+  return defaultState();
+}
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* private mode */ }
+}
+
+/* ============================== controls ============================== */
+
+const $ = (sel) => document.querySelector(sel);
+
+function el(tag, attrs, ...children) {
+  const n = document.createElement(tag);
+  if (attrs) for (const k in attrs) {
+    if (k === "class") n.className = attrs[k];
+    else if (k.startsWith("on")) n.addEventListener(k.slice(2), attrs[k]);
+    else if (k === "html") n.innerHTML = attrs[k];
+    else n.setAttribute(k, attrs[k]);
+  }
+  for (const c of children) if (c != null) n.append(c);
+  return n;
+}
+
+const UNIT_MULT = { K: 1e3, M: 1e6, B: 1e9 };
+function trimNum(v) { return String(parseFloat(v.toFixed(2))); }
+
+function moneyInput(value, onChange) {
+  const inp = el("input", { type: "text", inputmode: "decimal", placeholder: "0", "aria-label": "Amount" });
+  const sel = el("select", { "aria-label": "Unit" });
+  for (const u of ["K", "M", "B"]) sel.append(el("option", { value: u }, u));
+  sel.value = value >= 1e9 ? "B" : value > 0 && value < 1e6 ? "K" : "M";
+  if (value > 0) inp.value = trimNum(value / UNIT_MULT[sel.value]);
+
+  const emit = () => {
+    const n = parseFloat(inp.value.replace(/[^0-9.]/g, "")) || 0;
+    onChange(n * UNIT_MULT[sel.value]);
+    renderResults();
+  };
+  inp.addEventListener("input", () => {
+    const m = inp.value.match(/([kmb])/i);
+    if (m) { sel.value = m[1].toUpperCase(); inp.value = inp.value.replace(/[^0-9.]/g, ""); }
+    emit();
+  });
+  sel.addEventListener("change", emit);
+  inp.addEventListener("blur", () => {
+    const n = parseFloat(inp.value.replace(/[^0-9.]/g, "")) || 0;
+    inp.value = n > 0 ? trimNum(n) : "";
+  });
+
+  return el("div", { class: "money" },
+    el("span", { class: "cur" }, "$"),
+    inp,
+    el("span", { class: "unit-wrap" }, sel));
+}
+
+function renderFounders() {
+  const list = $("#foundersList");
+  list.textContent = "";
+  const sim = simulate(state);
+  state.founders.forEach((f, i) => {
+    const holder = sim.stakeholders.find((h) => h.id === "f" + f.id);
+    const name = el("input", { type: "text", placeholder: "Founder " + (i + 1), "aria-label": "Founder name" });
+    name.value = f.name;
+    name.addEventListener("input", () => { f.name = name.value; renderResults(); });
+
+    const pct = el("input", { type: "number", class: "pct", min: "0", max: "100", step: "1", "aria-label": "Founding split percent" });
+    pct.value = f.pct;
+    pct.addEventListener("input", () => { f.pct = Number(pct.value) || 0; renderNormNote(); renderResults(); });
+
+    const row = el("div", { class: "founder-row" },
+      el("div", { class: "name-wrap" },
+        el("span", { class: "dot founder-dot", style: "background:" + (holder ? holder.color : "#999") }),
+        name),
+      el("div", { class: "pct-wrap" }, pct),
+      state.founders.length > 1
+        ? el("button", { class: "del", title: "Remove founder", onclick: () => { state.founders = state.founders.filter((x) => x !== f); rerenderAll(); } }, "×")
+        : el("span")
+    );
+    list.append(row);
+  });
+
+  const poolPct = el("input", { type: "number", class: "pct", min: "0", max: "90", step: "1", "aria-label": "Initial option pool percent" });
+  poolPct.value = state.initialPool || "";
+  poolPct.placeholder = "0";
+  poolPct.addEventListener("input", () => { state.initialPool = Number(poolPct.value) || 0; renderResults(); });
+  list.append(el("div", { class: "pool-row" },
+    el("span", { class: "lbl" }, "Initial option pool"),
+    el("div", { class: "pct-wrap" }, poolPct),
+    el("span")
+  ));
+  renderNormNote();
+}
+
+function renderNormNote() {
+  const sum = state.founders.reduce((a, f) => a + (Number(f.pct) || 0), 0);
+  const note = $("#normNote");
+  if (Math.abs(sum - 100) > 0.01 && sum > 0) {
+    note.hidden = false;
+    note.textContent = "Splits sum to " + sum + " — treated as ratios of 100%.";
+  } else {
+    note.hidden = true;
+  }
+}
+
+function segControl(value, options, onChange) {
+  const seg = el("div", { class: "seg", role: "group" });
+  for (const opt of options) {
+    const b = el("button", { type: "button", class: value === opt.v ? "on" : "" }, opt.t);
+    b.addEventListener("click", () => {
+      onChange(opt.v);
+      [...seg.children].forEach((c, i) => c.classList.toggle("on", options[i].v === opt.v));
+      renderResults();
+    });
+    seg.append(b);
+  }
+  return seg;
+}
+
+function fieldWrap(labelTxt, control, cls) {
+  return el("div", { class: cls || "" }, el("label", { class: "f" }, labelTxt), control);
+}
+
+function renderRounds() {
+  const list = $("#roundsList");
+  list.textContent = "";
+  if (!state.rounds.length) {
+    list.append(el("div", { class: "empty-hint" }, "No rounds yet — add a SAFE or a priced round below."));
+    return;
+  }
+  let pricedCount = 0, safeCount = 0;
+  state.rounds.forEach((r) => {
+    const card = el("div", { class: "round-card" });
+    const del = el("button", { class: "del", title: "Remove round", onclick: () => { state.rounds = state.rounds.filter((x) => x !== r); rerenderAll(); } }, "×");
+
+    if (r.type === "safe") {
+      safeCount++;
+      const head = el("div", { class: "round-head" },
+        el("span", { class: "chip safe" }, "SAFE"),
+        el("span", { class: "rname" }, "SAFE " + safeCount),
+        del);
+      const grid = el("div", { class: "round-grid" },
+        fieldWrap("Investment", moneyInput(r.amount, (v) => (r.amount = v))),
+        fieldWrap("Valuation cap", moneyInput(r.cap, (v) => (r.cap = v))),
+        fieldWrap("Cap basis", segControl(r.capType || "post", [
+          { v: "post", t: "Post-money" },
+          { v: "pre", t: "Pre-money" },
+        ], (v) => (r.capType = v))),
+        fieldWrap("Discount", (() => {
+          const d = el("input", { type: "number", class: "pct", min: "0", max: "50", step: "1", placeholder: "0" });
+          d.value = r.discount || "";
+          d.addEventListener("input", () => { r.discount = Number(d.value) || 0; renderResults(); });
+          return el("div", { class: "pct-wrap" }, d);
+        })())
+      );
+      card.append(head, grid);
+    } else if (r.type === "pool") {
+      const head = el("div", { class: "round-head" },
+        el("span", { class: "chip pool" }, "Options"),
+        el("span", { class: "rname" }, "Employee options"),
+        del);
+      const pctInp = el("input", { type: "number", class: "pct", min: "0", max: "60", step: "1", placeholder: "10" });
+      pctInp.value = r.pct || "";
+      pctInp.addEventListener("input", () => { r.pct = Number(pctInp.value) || 0; renderResults(); });
+      const grid = el("div", { class: "round-grid" },
+        fieldWrap("Pool size (of company)", el("div", { class: "pct-wrap" }, pctInp)));
+      card.append(head, grid);
+    } else {
+      pricedCount++;
+      const dn = defaultRoundName(pricedCount);
+      const nameInp = el("input", { type: "text", class: "rname-edit", placeholder: dn, "aria-label": "Round name" });
+      nameInp.value = r.name || "";
+      nameInp.addEventListener("input", () => { r.name = nameInp.value; renderResults(); });
+      const head = el("div", { class: "round-head" },
+        el("span", { class: "chip priced" }, "Priced"),
+        nameInp,
+        del);
+      const grid = el("div", { class: "round-grid" },
+        fieldWrap("Raised", moneyInput(r.amount, (v) => (r.amount = v))),
+        fieldWrap("Pre-money valuation", moneyInput(r.premoney, (v) => (r.premoney = v)))
+      );
+      card.append(head, grid);
+    }
+    list.append(card);
+  });
+}
+
+/* ============================== results ============================== */
+
+let lastSim = null;
+
+function renderResults() {
+  saveState();
+  lastSim = simulate(state);
+  renderSummary(lastSim);
+  renderExit(lastSim);
+  renderChart(lastSim);
+  renderTable(lastSim);
+}
+
+function renderExit(sim) {
+  const box = $("#exitPayouts");
+  const bar = $("#exitBar");
+  const tbl = $("#exitTable");
+  box.textContent = ""; bar.textContent = ""; tbl.textContent = "";
+  const exit = Number(state.exit) || 0;
+  const last = sim.stages[sim.stages.length - 1];
+  if (!(exit > 0) || last.total <= 0) {
+    box.append(el("div", { class: "exit-hint" }, "Enter a sale price to see everyone's take-home."));
+    return;
+  }
+  const fracOf = (h) => (last.shares[h.id] || 0) / last.total;
+
+  for (const f of sim.stakeholders.filter((h) => h.kind === "founder")) {
+    const frac = fracOf(f);
+    box.append(el("div", { class: "payout" },
+      el("div", { class: "who" }, el("span", { class: "dot", style: "background:" + f.color }), el("span", { class: "nm" }, f.name)),
+      el("div", { class: "big" }, fmtMoney(frac * exit)),
+      el("div", { class: "val" }, fmtPct(frac) + " of the company")));
+  }
+
+  for (const h of sim.stakeholders) {
+    const frac = fracOf(h);
+    if (frac <= 0) continue;
+    bar.append(el("i", { style: "width:" + frac * 100 + "%;background:" + h.color, title: h.name + " " + fmtPct(frac) }));
+  }
+
+  tbl.append(el("tr", null,
+    el("th", null, "Holder"),
+    el("th", { class: "num" }, "Ownership"),
+    el("th", { class: "num" }, "Proceeds")));
+  const groups = [
+    ["Founders", (h) => h.kind === "founder"],
+    ["Option pool", (h) => h.kind === "pool"],
+    ["Investors", (h) => h.kind === "investor"],
+  ];
+  for (const [gname, test] of groups) {
+    const rows = sim.stakeholders.filter((h) => test(h) && fracOf(h) > 0);
+    if (!rows.length) continue;
+    if (gname !== "Founders") tbl.append(el("tr", null, el("td", { class: "grp", colspan: "3" }, gname)));
+    for (const h of rows) {
+      const frac = fracOf(h);
+      tbl.append(el("tr", null,
+        el("td", null,
+          el("div", { class: "h-name" }, el("span", { class: "dot", style: "background:" + h.color }), h.name),
+          h.sub ? el("div", { class: "h-sub" }, h.sub) : null),
+        el("td", { class: "num" }, fmtPct(frac)),
+        el("td", { class: "num" }, fmtMoney(frac * exit))));
+    }
+  }
+}
+
+function selectedStageIndex(sim) {
+  const n = sim.stages.length;
+  let i = state.selectedStage;
+  if (i == null || i < 0 || i >= n) i = n - 1;
+  return i;
+}
+
+function renderSummary(sim) {
+  const box = $("#summaryFounders");
+  box.textContent = "";
+  const last = sim.stages[sim.stages.length - 1];
+  const founders = sim.stakeholders.filter((h) => h.kind === "founder");
+  for (const f of founders) {
+    const frac = last.total > 0 ? (last.shares[f.id] || 0) / last.total : 0;
+    let valTxt = " ";
+    if (last.post) valTxt = fmtMoney(frac * last.post) + (last.est ? " est. paper value" : " paper value");
+    box.append(el("div", { class: "card sum-card" },
+      el("div", { class: "who" }, el("span", { class: "dot", style: "background:" + f.color }), el("span", { class: "nm" }, f.name)),
+      el("div", { class: "big" }, fmtPct(frac)),
+      el("div", { class: "val" }, valTxt)
+    ));
+  }
+}
+
+/* ---------- chart ---------- */
+
+const CHART_H = 320;
+const M = { top: 10, right: 118, bottom: 30, left: 40 };
+
+function renderChart(sim) {
+  const svg = $("#chart");
+  const wrap = $("#chartWrap");
+  const width = wrap.clientWidth || 600;
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", CHART_H);
+  svg.setAttribute("viewBox", "0 0 " + width + " " + CHART_H);
+  svg.textContent = "";
+
+  $("#chartNote").hidden = !sim.stages.some((s) => s.est);
+
+  let stages = sim.stages;
+  const single = stages.length === 1;
+  if (single) stages = [stages[0], stages[0]];
+
+  const iw = width - M.left - M.right;
+  const ih = CHART_H - M.top - M.bottom;
+  const X = (i) => M.left + (stages.length === 1 ? iw / 2 : (i * iw) / (stages.length - 1));
+  const Y = (f) => M.top + ih * (1 - f);
+
+  const NS = "http://www.w3.org/2000/svg";
+  const mk = (tag, attrs) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    return n;
+  };
+
+  // y grid
+  for (const p of [0, 0.25, 0.5, 0.75, 1]) {
+    svg.append(mk("line", { x1: M.left, x2: width - M.right, y1: Y(p), y2: Y(p), stroke: "var(--line-soft)", "stroke-width": 1 }));
+    const t = mk("text", { x: M.left - 8, y: Y(p) + 3.5, "text-anchor": "end", "font-size": 10, fill: "var(--faint)" });
+    t.textContent = Math.round(p * 100) + "%";
+    svg.append(t);
+  }
+
+  // cumulative fractions per stage per stakeholder (stacked bottom-up)
+  const fracs = stages.map((st) =>
+    sim.stakeholders.map((h) => (st.total > 0 ? (st.shares[h.id] || 0) / st.total : 0))
+  );
+  const cum = fracs.map((row) => {
+    let acc = 0;
+    return row.map((f) => { const lo = acc; acc += f; return [lo, acc]; });
+  });
+
+  // bands
+  sim.stakeholders.forEach((h, hi) => {
+    let d = "";
+    stages.forEach((st, i) => { d += (i ? " L " : "M ") + X(i) + " " + Y(cum[i][hi][1]); });
+    for (let i = stages.length - 1; i >= 0; i--) d += " L " + X(i) + " " + Y(cum[i][hi][0]);
+    d += " Z";
+    svg.append(mk("path", { d, fill: h.color, "fill-opacity": 0.82, stroke: "var(--card)", "stroke-width": 1 }));
+  });
+
+  // stage verticals + labels
+  const selIdx = selectedStageIndex(sim);
+  sim.stages.forEach((st, i) => {
+    const x = X(single ? 1 : i);
+    if (single && i === 0) return;
+    const line = mk("line", {
+      x1: x, x2: x, y1: M.top, y2: M.top + ih,
+      stroke: i === selIdx ? "var(--ink)" : "var(--faint)",
+      "stroke-opacity": i === selIdx ? 0.55 : 0.28,
+      "stroke-width": 1,
+    });
+    if (st.est) line.setAttribute("stroke-dasharray", "3 3");
+    svg.append(line);
+  });
+  sim.stages.forEach((st, i) => {
+    const x = X(single ? (i === 0 ? 0.0 : 1) : i);
+    if (single && i === 0) return;
+    const t = mk("text", {
+      x, y: CHART_H - 10, "text-anchor": i === 0 ? "start" : i === sim.stages.length - 1 && !single ? "middle" : "middle",
+      "font-size": 11, fill: i === selIdx ? "var(--ink)" : "var(--muted)",
+      "font-weight": i === selIdx ? "600" : "400",
+    });
+    t.textContent = st.label + (st.est ? " (est.)" : "");
+    svg.append(t);
+  });
+  if (single) {
+    const t = mk("text", { x: X(1), y: CHART_H - 10, "text-anchor": "middle", "font-size": 11, fill: "var(--muted)" });
+    t.textContent = sim.stages[0].label;
+    svg.append(t);
+  }
+
+  // end labels for the final stage, de-overlapped
+  const lastIdx = stages.length - 1;
+  const labels = sim.stakeholders
+    .map((h, hi) => ({
+      h,
+      frac: fracs[lastIdx][hi],
+      y: Y((cum[lastIdx][hi][0] + cum[lastIdx][hi][1]) / 2),
+    }))
+    .filter((L) => L.frac >= 0.02)
+    .sort((a, b) => a.y - b.y);
+  const GAP = 13;
+  for (let i = 1; i < labels.length; i++) {
+    if (labels[i].y - labels[i - 1].y < GAP) labels[i].y = labels[i - 1].y + GAP;
+  }
+  const overflow = labels.length ? labels[labels.length - 1].y - (M.top + ih) : 0;
+  if (overflow > 0) for (const L of labels) L.y -= overflow;
+  for (const L of labels) {
+    const t = mk("text", { x: width - M.right + 8, y: L.y + 3.5, "font-size": 11, fill: L.h.color, class: "endlbl" });
+    const name = L.h.kind === "investor" ? L.h.name.replace(" investors", "") : L.h.name;
+    t.textContent = name + " " + fmtPct(L.frac);
+    svg.append(t);
+  }
+
+  // interaction
+  svg.onmousemove = (e) => {
+    const rect = svg.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    let best = 0, bd = Infinity;
+    sim.stages.forEach((st, i) => {
+      const x = X(single ? 1 : i);
+      const d = Math.abs(mx - x);
+      if (d < bd) { bd = d; best = i; }
+    });
+    showTip(sim, best, e.clientY - rect.top, X(single ? 1 : best), width);
+  };
+  svg.onmouseleave = () => { $("#tip").style.display = "none"; };
+  svg.onclick = (e) => {
+    const rect = svg.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    let best = 0, bd = Infinity;
+    sim.stages.forEach((st, i) => {
+      const x = X(single ? 1 : i);
+      const d = Math.abs(mx - x);
+      if (d < bd) { bd = d; best = i; }
+    });
+    state.selectedStage = best === sim.stages.length - 1 ? -1 : best;
+    renderResults();
+  };
+}
+
+function showTip(sim, i, my, x, chartW) {
+  const tip = $("#tip");
+  const st = sim.stages[i];
+  tip.textContent = "";
+  tip.append(el("div", { class: "t-head" },
+    st.label + " ",
+    st.est ? el("small", null, "est. at cap") : (st.post ? el("small", null, fmtMoney(st.post) + " post") : null)));
+  for (const h of [...sim.stakeholders].reverse()) {
+    const frac = st.total > 0 ? (st.shares[h.id] || 0) / st.total : 0;
+    if (frac <= 0) continue;
+    tip.append(el("div", { class: "t-row" },
+      el("span", { class: "dot", style: "background:" + h.color }),
+      el("span", { class: "nm" }, h.name),
+      el("span", { class: "pv" }, fmtPct(frac))));
+  }
+  tip.style.display = "block";
+  const tw = tip.offsetWidth;
+  let left = x + 12;
+  if (left + tw > chartW - 4) left = x - tw - 12;
+  tip.style.left = Math.max(4, left) + "px";
+  tip.style.top = Math.min(CHART_H - tip.offsetHeight - 8, Math.max(4, my - 20)) + "px";
+}
+
+/* ---------- cap table ---------- */
+
+function renderTable(sim) {
+  const chips = $("#stageChips");
+  chips.textContent = "";
+  const selIdx = selectedStageIndex(sim);
+  sim.stages.forEach((st, i) => {
+    const b = el("button", { class: i === selIdx ? "on" : "" }, st.label + (st.est ? " ·est" : ""));
+    b.addEventListener("click", () => {
+      state.selectedStage = i === sim.stages.length - 1 ? -1 : i;
+      renderResults();
+    });
+    chips.append(b);
+  });
+
+  const st = sim.stages[selIdx];
+  const meta = $("#tblMeta");
+  meta.textContent = "";
+  if (st.post) {
+    meta.append(st.est ? "Implied valuation " : "Post-money ", el("b", null, fmtMoney(st.post)), st.est ? " (at cap — converts at the next priced round)" : "");
+  } else {
+    meta.append("No valuation yet");
+  }
+
+  const tbl = $("#capTable");
+  tbl.textContent = "";
+  const thead = el("tr", null,
+    el("th", null, "Holder"),
+    el("th", { class: "num" }, "Ownership"),
+    el("th", { class: "num" }, "Value"));
+  tbl.append(thead);
+
+  const groups = [
+    ["Founders", (h) => h.kind === "founder"],
+    ["Option pool", (h) => h.kind === "pool"],
+    ["Investors", (h) => h.kind === "investor"],
+  ];
+  for (const [gname, test] of groups) {
+    const rows = sim.stakeholders.filter((h) => test(h) && (st.shares[h.id] || 0) > 0);
+    if (!rows.length) continue;
+    if (gname !== "Founders") tbl.append(el("tr", null, el("td", { class: "grp", colspan: "3" }, gname)));
+    let gFrac = 0;
+    for (const h of rows) {
+      const frac = st.total > 0 ? (st.shares[h.id] || 0) / st.total : 0;
+      gFrac += frac;
+      const val = st.post ? frac * st.post : null;
+      tbl.append(el("tr", null,
+        el("td", null,
+          el("div", { class: "h-name" }, el("span", { class: "dot", style: "background:" + h.color }), h.name),
+          h.sub ? el("div", { class: "h-sub" }, h.sub) : null),
+        el("td", { class: "num" },
+          el("span", { class: "bar-cell" },
+            el("span", { class: "mini-bar" }, el("i", { style: "width:" + Math.min(100, frac * 100) + "%;background:" + h.color })),
+            fmtPct(frac))),
+        el("td", { class: "num" }, val ? fmtMoney(val) : "—")));
+    }
+  }
+}
+
+/* ============================== wiring ============================== */
+
+function rerenderAll() {
+  renderFounders();
+  renderRounds();
+  renderResults();
+}
+
+$("#addFounder").addEventListener("click", () => {
+  state.seq++;
+  const n = state.founders.length + 1;
+  state.founders.push({ id: state.seq, name: "", pct: 0 });
+  rerenderAll();
+});
+function nice(v) {
+  if (!(v > 0)) return 0;
+  const p = Math.pow(10, Math.floor(Math.log10(v)) - 1);
+  return Math.round(v / p) * p;
+}
+function lastValuation() {
+  const sim = simulate(state);
+  let post = 0;
+  for (const st of sim.stages) if (st.post) post = st.post;
+  return post;
+}
+$("#addSafe").addEventListener("click", () => {
+  state.seq++;
+  const post = lastValuation();
+  state.rounds.push({
+    id: state.seq, type: "safe",
+    amount: 500000,
+    cap: post > 0 ? nice(post * 1.5) : 6000000,
+    capType: "post", discount: 0,
+  });
+  rerenderAll();
+});
+$("#addPriced").addEventListener("click", () => {
+  state.seq++;
+  const post = lastValuation();
+  const premoney = post > 0 ? nice(post * 2.5) : 12000000;
+  state.rounds.push({
+    id: state.seq, type: "priced", name: "",
+    amount: nice(premoney / 4),
+    premoney,
+  });
+  rerenderAll();
+});
+$("#addPool").addEventListener("click", () => {
+  state.seq++;
+  state.rounds.push({ id: state.seq, type: "pool", pct: 10 });
+  rerenderAll();
+});
+$("#resetBtn").addEventListener("click", () => {
+  state = defaultState();
+  mountExitInput();
+  setTab("dilution");
+  rerenderAll();
+});
+
+function mountExitInput() {
+  const slot = $("#exitMoney");
+  slot.textContent = "";
+  slot.append(moneyInput(Number(state.exit) || 0, (v) => (state.exit = v)));
+}
+mountExitInput();
+
+function setTab(t) {
+  state.tab = t;
+  $("#tabDilution").hidden = t === "exit";
+  $("#tabExit").hidden = t !== "exit";
+  $("#tabBtnDilution").classList.toggle("on", t !== "exit");
+  $("#tabBtnExit").classList.toggle("on", t === "exit");
+  renderResults();
+}
+$("#tabBtnDilution").addEventListener("click", () => setTab("dilution"));
+$("#tabBtnExit").addEventListener("click", () => setTab("exit"));
+if (state.tab === "exit") setTab("exit");
+
+if (typeof ResizeObserver !== "undefined") {
+  new ResizeObserver(() => { if (lastSim) renderChart(lastSim); }).observe($("#chartWrap"));
+}
+
+rerenderAll();
+</script>
+</body>
+</html>
